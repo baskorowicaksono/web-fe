@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '../../lib/hooks/useAuth'
 import { useSidebar } from '../../lib/hooks/useSidebar'
+import { FileIcon } from 'lucide-react'
 
 const navigation = [
   { 
@@ -61,6 +62,11 @@ const navigation = [
       </svg>
     )
   },
+  {
+    name: 'Sector Mapping',
+    href: '/dashboard/sector-mapping',
+    icon: <FileIcon />
+  },
 ]
 
 const adminNavigation = [
@@ -102,7 +108,7 @@ export default function DashboardSidebar() {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById('sidebar')
       const mobileToggle = document.getElementById('mobile-toggle')
-      
+
       if (
         window.innerWidth < 1024 && 
         isMobileOpen && 
