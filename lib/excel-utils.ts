@@ -76,20 +76,20 @@ export class ExcelUtils {
             ],
             range: 1 // Skip header row
           })
-          
+
           // Transform data
           const mappings: ExcelSectorData[] = jsonData.map((row: any) => ({
-            sectorCode: '', // Will be generated or extracted
-            sectorType: row.sectorName || '',
-            existingGroup: row.sectorGroup || '',
-            newGroupType: '',
-            newGroupName: row.sectorGroup || '',
-            effectiveDate: row.effectiveStartDate || '',
-            endDate: row.endDate || '',
-            createdBy: row.createdBy || '',
-            updatedBy: row.updatedBy || '',
-            approvedBy: row.approvedBy || ''
-          })).filter(mapping => mapping.sectorType) // Filter out empty rows
+            sectorCode: String(row['Sector Code']).trim(), // Will be generated or extracted
+            sectorType: String(row['Existing Sector KLM Type']).trim(),
+            existingGroup: String(row['Existing Group']).trim(),
+            newGroupType: String(row['New Sector KLM Type']).trim()?? '',
+            newGroupName: String(row['New Sector Group']).trim()?? '',
+            effectiveDate: new Date().toISOString().split('T')[0],      // Currently set to today, will be updated in the future
+            endDate: '',
+            createdBy: row.createdBy?? 'system',
+            updatedBy: row.updatedBy?? '',
+            approvedBy: row.approvedBy?? ''
+          })).filter((row : ExcelSectorData) => row.sectorType && row.sectorCode) // Filter out empty rows
           
           resolve(mappings)
         } catch (error) {
