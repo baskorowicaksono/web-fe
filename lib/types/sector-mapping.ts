@@ -13,6 +13,41 @@ export interface SectorMapping {
   updatedAt: string               // ISO timestamp
 }
 
+export interface CreateSectorMappingRequest {
+  sectorName: string
+  groupId: number
+  sektorEkonomi: string[]  // Array of sector codes to map
+  tipeKelompok: 'NON_KLM' | 'SEKTOR_TERTENTU' | 'HIJAU'
+  namaKelompok?: string
+  prioritasSektor?: number
+  effectiveStartDate: string
+  endDate?: string
+}
+
+export interface SectorGroup {
+  id: number
+  namaGrup: string
+  deskripsi?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface EconomicSector {
+  sektorEkonomi: string
+  ket10se?: string
+  kategoriUtama?: string
+  createdAt: string
+}
+
+export interface SectorMappingStatsData {
+  total: number
+  active: number
+  pending: number
+  draft: number
+  upcomingEffective: number
+}
+
 export interface ExcelSectorData {
   sectorCode: string
   sectorType: string              // Maps to sectorName
@@ -24,4 +59,13 @@ export interface ExcelSectorData {
   createdBy: string
   updatedBy?: string
   approvedBy?: string
+}
+
+export interface SectorMappingFilters {
+  status?: 'all' | 'draft' | 'active' | 'pending_approval' | 'approved'
+  dateRange?: 'all' | 'today' | 'week' | 'month' | 'quarter'
+  sectorCode?: string
+  createdBy?: string
+  page?: number
+  limit?: number
 }

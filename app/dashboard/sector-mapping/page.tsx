@@ -5,83 +5,43 @@ import SectorMappingList from '../../components/SectorMappingList'
 import SectorMappingStats from '../../components/SectorMappingStats'
 import SectorMappingFilters from '../../components/SectorMappingFilter'
 import UploadSectorModal from '../../components/UploadSectorModal'
-import { SectorMapping } from '../../../lib/types/sector-mapping'
+import { useSectorMappings, useSectorMappingStats } from '../../../lib/hooks/useSectorMapping'
 import { ExcelUtils } from '../../../lib/excel-utils'
 import * as XLSX from 'xlsx'
 import toast from 'react-hot-toast'
 
-const mockSectorMappings: SectorMapping[] = [
-  {
-    id: '1',
-    action: 'download',
-    sectorName: 'KLM Economical Sector since Apr 2025',
-    sectorGroups: ['Sector Group 1', 'Sector Group 2', 'Sector Group n'],
-    effectiveStartDate: '2025-04-01',
-    createdBy: 'xxx',
-    approvedBy: 'xxx',
-    status: 'approved',
-    createdAt: '2024-12-01T10:00:00Z',
-    updatedAt: '2024-12-01T10:00:00Z'
-  },
-  {
-    id: '2',
-    action: 'download',
-    sectorName: 'KLM Economical Sector since Jan 2025',
-    sectorGroups: ['Sector Group 1', 'Sector Group 2', 'Sector Group n'],
-    effectiveStartDate: '2025-01-01',
-    endDate: '2025-03-31',
-    createdBy: 'xxx',
-    updatedBy: 'xxx',
-    approvedBy: 'xxx',
-    status: 'active',
-    createdAt: '2024-11-01T10:00:00Z',
-    updatedAt: '2024-11-01T10:00:00Z'
-  }
-]
-
 export default function SectorMappingPage() {
   const [showUploadModal, setShowUploadModal] = useState(false)
-  const [sectorMappings, setSectorMappings] = useState<SectorMapping[]>(mockSectorMappings)
-  const [isLoading, setIsLoading] = useState(false)
   const [filters, setFilters] = useState({
-    status: 'all',
-    dateRange: 'all',
+    status: 'all' as const,
+    dateRange: 'all' as const,
     sectorCode: '',
     createdBy: ''
   })
 
-  const handleUploadSuccess = async (file: File, sectorName: string, effectiveDate: string) => {
-    setIsLoading(true)
-    
-    try {
-      // Parse the Excel file
-      const excelData = await ExcelUtils.parseExcelFile(file)
-      
-      // Create new mappings from Excel data
-      const newMappings: SectorMapping[] = excelData.map((data, index) => ({
-        id: `new_${Date.now()}_${index}`,
-        action: 'download',
-        sectorName: data.sectorType,
-        sectorGroups: data.existingGroup.split('\n').filter(g => g.trim()),
-        effectiveStartDate: data.effectiveDate,
-        endDate: data.endDate,
-        createdBy: data.createdBy,
-        updatedBy: data.updatedBy,
-        approvedBy: data.approvedBy,
-        status: 'draft' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }))
+  // Use the updated hooks
+  const {
+    mappings,
+    loading,
+    error,
+    pagination,
+    uploadMappings,
+    deleteMappings,
+    approveMappings,
+    updateMapping,
+    updateFilters,
+    loadNextPage,
+    loadPreviousPage
+  } = useSectorMappings(filters)
 
-      setSectorMappings(prev => [...newMappings, ...prev])
+  const { stats, loading: statsLoading } = useSectorMappingStats()
+
+  const handleUploadSuccess = async (file: File, sectorName: string, effectiveDate: string) => {
+    try {
+      await uploadMappings(file, sectorName, effectiveDate)
       setShowUploadModal(false)
-      toast.success(`Successfully uploaded ${newMappings.length} sector mappings from Excel file`)
-      
     } catch (error) {
-      toast.error('Failed to process Excel file')
       console.error('Upload error:', error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -109,7 +69,7 @@ export default function SectorMappingPage() {
         'Approved By'
       ]
       
-      const exportData = filteredMappings.map(mapping => [
+      const exportData = mappings.map(mapping => [
         'Download',
         mapping.sectorName,
         mapping.sectorGroups.map(g => `<${g}>`).join('\n'),
@@ -142,37 +102,10 @@ export default function SectorMappingPage() {
     }
   }
 
-  // Apply filters to mappings
-  const filteredMappings = sectorMappings.filter(mapping => {
-    if (filters.status !== 'all' && mapping.status !== filters.status) return false
-    if (filters.sectorCode && !mapping.sectorName.toLowerCase().includes(filters.sectorCode.toLowerCase())) return false
-    if (filters.createdBy && !mapping.createdBy.toLowerCase().includes(filters.createdBy.toLowerCase())) return false
-    
-    if (filters.dateRange !== 'all') {
-      const createdDate = new Date(mapping.createdAt)
-      const now = new Date()
-      
-      switch (filters.dateRange) {
-        case 'today':
-          if (createdDate.toDateString() !== now.toDateString()) return false
-          break
-        case 'week':
-          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          if (createdDate < weekAgo) return false
-          break
-        case 'month':
-          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          if (createdDate < monthAgo) return false
-          break
-        case 'quarter':
-          const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-          if (createdDate < quarterAgo) return false
-          break
-      }
-    }
-    
-    return true
-  })
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+    updateFilters({ ...newFilters, page: 1 }) // Reset to first page when filters change
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -186,7 +119,7 @@ export default function SectorMappingPage() {
 
       {/* Statistics */}
       <div className="animate-slide-up">
-        <SectorMappingStats mappings={sectorMappings} />
+        <SectorMappingStats stats={stats} loading={statsLoading} />
       </div>
 
       {/* Action Buttons */}
@@ -195,6 +128,7 @@ export default function SectorMappingPage() {
           <button
             onClick={() => setShowUploadModal(true)}
             className="btn-primary btn-large"
+            disabled={loading}
           >
             <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -216,16 +150,29 @@ export default function SectorMappingPage() {
       {/* Filters */}
       <div className="animate-slide-up">
         <SectorMappingFilters 
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFiltersChange}
           onExport={handleExport}
         />
       </div>
 
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
       {/* Mappings List */}
       <div className="animate-slide-up">
         <SectorMappingList 
-          mappings={filteredMappings}
-          loading={isLoading}
+          mappings={mappings}
+          loading={loading}
+          pagination={pagination}
+          onNextPage={loadNextPage}
+          onPreviousPage={loadPreviousPage}
+          onApprove={approveMappings}
+          onDelete={deleteMappings}
+          onUpdate={updateMapping}
         />
       </div>
 

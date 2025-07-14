@@ -5,7 +5,18 @@ import { SectorMapping } from '../../lib/types/sector-mapping'
 
 interface SectorMappingListProps {
   mappings: SectorMapping[]
-  loading: boolean
+  loading: boolean,
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  },
+  onNextPage?: () => void
+  onPreviousPage?: () => void
+  onApprove?: (ids: string[]) => Promise<void>
+  onDelete?: (ids: string[]) => Promise<void>
+  onUpdate?: (id: string, updates: Partial<SectorMapping>) => Promise<void>
 }
 
 export default function SectorMappingList({ mappings, loading }: SectorMappingListProps) {
