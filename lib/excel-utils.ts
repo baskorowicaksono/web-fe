@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 import { ExcelSectorData } from './types/sector-mapping'
+import Cookies from 'js-cookie'
 
 export class ExcelUtils {
 
@@ -409,6 +410,6 @@ export class ExcelUtils {
   }
 
   private static getAuthToken(): string | null {
-    return localStorage.getItem('authToken') || null
+    return Cookies.get('auth-token') || null
   }
 }
