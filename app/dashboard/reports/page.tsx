@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function ReportsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly')
@@ -45,10 +46,10 @@ export default function ReportsPage() {
   ]
 
   const reportTemplates = [
-    { name: 'Economic Indicators', description: 'Standard economic indicators report', icon: '📊' },
-    { name: 'Forecast Analysis', description: 'Predictive analysis and forecasting', icon: '🔮' },
-    { name: 'Risk Assessment', description: 'Comprehensive risk evaluation', icon: '⚠️' },
-    { name: 'Custom Report', description: 'Build your own custom report', icon: '🔧' },
+    { name: 'Buku', description: 'Buku, jurnal, atau publikasi lainnya', icon: '📚', path: '/dashboard/reports/new?type=buku' },
+    { name: 'Laporan', description: 'Laporan dari suatu kegiatan yang telah dilaksanakan', icon: '📊', path: '/dashboard/reports/new?type=laporan' },
+    { name: 'Risalah', description: 'Risalah dari rapat seperti RKP, FGD, dll', icon: '📰', path: '/dashboard/reports/new?type=risalah' },
+    { name: 'IN/PN', description: 'Issue Note/Policy Note dari RSOMA, SOMA, KBKU, ataupun RDG', icon: '⚠️', path: '/dashboard/reports/new?type=inpn' },
   ]
 
   return (
@@ -64,9 +65,10 @@ export default function ReportsPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">
         {reportTemplates.map((template, index) => (
-          <button
+          <Link
             key={index}
-            className="card hover:shadow-medium transition-all duration-200 text-left group"
+            href={template.path}
+            className="card hover:shadow-medium transition-all duration-200 text-left group cursor-pointer"
           >
             <div className="flex items-center space-x-3 mb-3">
               <span className="text-2xl">{template.icon}</span>
@@ -75,7 +77,7 @@ export default function ReportsPage() {
               </h3>
             </div>
             <p className="text-sm text-neutral-600">{template.description}</p>
-          </button>
+          </Link>
         ))}
       </div>
 
@@ -94,12 +96,12 @@ export default function ReportsPage() {
               <option value="quarterly">This Quarter</option>
               <option value="yearly">This Year</option>
             </select>
-            <button className="btn-primary">
+            <Link href="/dashboard/reports/new" className="btn-primary">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               New Report
-            </button>
+            </Link>
           </div>
         </div>
 
