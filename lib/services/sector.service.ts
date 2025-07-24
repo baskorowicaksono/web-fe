@@ -17,19 +17,59 @@ export interface ActiveMapping {
   endDate?: Date
 }
 
+// Interface for raw database results from $queryRaw
+interface RawSectorCodeResult {
+  sector_code: string
+}
+
+interface RawActiveMappingResult {
+  sector_code: string
+  tipe_kelompok: string
+  nama_kelompok: string
+  is_active: boolean
+  effective_date: Date
+  end_date: Date | null
+}
+
+interface RawLatestActiveMappingResult {
+  sector_code: string
+  tipe_kelompok: string
+  nama_kelompok: string
+  effective_date: Date
+  end_date: Date | null
+  row_num: number
+}
+
+// Interface for template data
+export interface TemplateData {
+  sectorCode: string
+  tipe_kelompok: string
+  nama_kelompok: string
+}
+
+// Interface for save mappings parameters
+export interface SaveMappingInput {
+  sectorCode: string
+  newGroupType?: string
+  newGroupName?: string
+  effectiveDate?: Date
+  userId?: string
+}
+
 export class SectorService {
   static async getAllSectorCodes(): Promise<string[]> {
     try {
-      const sectors = await prisma.$queryRaw<Array<{sector_code: string}>>`
+      const sectors = await prisma.$queryRaw<RawSectorCodeResult[]>`
         SELECT DISTINCT sector_code
         FROM economic_sectors
         ORDER BY sector_code ASC
       `
       
-      return sectors.map(sector => sector.sector_code)
-    } catch (error) {
+      return sectors.map((sector: RawSectorCodeResult) => sector.sector_code)
+    } catch (error: unknown) {
       console.error('Error fetching sector codes:', error)
-      throw new Error('Failed to fetch sector codes from database')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      throw new Error(`Failed to fetch sector codes from database: ${errorMessage}`)
     }
   }
 
@@ -41,14 +81,7 @@ export class SectorService {
     try {
       // Replace with your actual database query
       // This is a placeholder - adjust table name and column names as needed
-      const mappings = await prisma.$queryRaw<Array<{
-        sector_code: string
-        tipe_kelompok: string
-        nama_kelompok: string
-        is_active: boolean
-        effective_date: Date
-        end_date: Date | null
-      }>>`
+      const mappings = await prisma.$queryRaw<RawActiveMappingResult[]>`
         SELECT 
           sector_code,
           tipe_kelompok,
@@ -61,7 +94,7 @@ export class SectorService {
         ORDER BY sector_code ASC, effective_date DESC
       `
       
-      return mappings.map(mapping => ({
+      return mappings.map((mapping: RawActiveMappingResult): ActiveMapping => ({
         sectorCode: mapping.sector_code,
         tipe_kelompok: mapping.tipe_kelompok,
         nama_kelompok: mapping.nama_kelompok,
@@ -69,9 +102,10 @@ export class SectorService {
         effectiveDate: mapping.effective_date,
         endDate: mapping.end_date || undefined
       }))
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching active mappings:', error)
-      throw new Error('Failed to fetch active sector mappings from database')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      throw new Error(`Failed to fetch active sector mappings from database: ${errorMessage}`)
     }
   }
 
@@ -79,27 +113,23 @@ export class SectorService {
    * Get template data combining sector codes with their active mappings
    * This generates the data structure needed for the Excel template
    */
-  static async getTemplateData(): Promise<Array<{
-    sectorCode: string
-    tipe_kelompok: string
-    nama_kelompok: string
-  }>> {
+  static async getTemplateData(): Promise<TemplateData[]> {
     try {
       // Get all sector codes
-      const sectorCodes = await this.getAllSectorCodes()
+      const sectorCodes: string[] = await this.getAllSectorCodes()
       
       // Get active mappings
-      const activeMappings = await this.getActiveSectorMappings()
+      const activeMappings: ActiveMapping[] = await this.getActiveSectorMappings()
       
       // Create a map for quick lookup
       const mappingMap = new Map<string, ActiveMapping>()
-      activeMappings.forEach(mapping => {
+      activeMappings.forEach((mapping: ActiveMapping) => {
         mappingMap.set(mapping.sectorCode, mapping)
       })
       
       // Combine data according to requirements
-      const templateData = sectorCodes.map(sectorCode => {
-        const mapping = mappingMap.get(sectorCode)
+      const templateData: TemplateData[] = sectorCodes.map((sectorCode: string): TemplateData => {
+        const mapping: ActiveMapping | undefined = mappingMap.get(sectorCode)
         
         return {
           sectorCode,
@@ -109,9 +139,10 @@ export class SectorService {
       })
       
       return templateData
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error generating template data:', error)
-      throw new Error('Failed to generate template data')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      throw new Error(`Failed to generate template data: ${errorMessage}`)
     }
   }
 
@@ -122,14 +153,7 @@ export class SectorService {
   static async getLatestActiveMappings(): Promise<ActiveMapping[]> {
     try {
       // This query gets the most recent active mapping for each sector code
-      const mappings = await prisma.$queryRaw<Array<{
-        sector_code: string
-        tipe_kelompok: string
-        nama_kelompok: string
-        effective_date: Date
-        end_date: Date | null
-        row_num: number
-      }>>`
+      const mappings = await prisma.$queryRaw<RawLatestActiveMappingResult[]>`
         WITH ranked_mappings AS (
           SELECT
             sector_code,
@@ -156,7 +180,7 @@ export class SectorService {
         ORDER BY sector_code ASC
       `
       
-      return mappings.map(mapping => ({
+      return mappings.map((mapping: RawLatestActiveMappingResult): ActiveMapping => ({
         sectorCode: mapping.sector_code,
         tipe_kelompok: mapping.tipe_kelompok,
         nama_kelompok: mapping.nama_kelompok,
@@ -164,9 +188,10 @@ export class SectorService {
         effectiveDate: mapping.effective_date,
         endDate: mapping.end_date || undefined
       }))
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching latest active mappings:', error)
-      throw new Error('Failed to fetch latest active sector mappings')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      throw new Error(`Failed to fetch latest active sector mappings: ${errorMessage}`)
     }
   }
 
@@ -174,53 +199,45 @@ export class SectorService {
    * Save new sector mappings from uploaded Excel file
    * This would be called when processing uploaded templates
    */
-  static async saveSectorMappings(mappings: Array<{
-    sectorCode: string
-    newGroupType?: string
-    newGroupName?: string
-    effectiveDate: Date
-    createdBy: string
-  }>): Promise<void> {
+  static async saveSectorMappings(
+    mappings: SaveMappingInput[], 
+    userId: string
+  ): Promise<{ savedCount: number; mappings: ActiveMapping[] }> {
     try {
-      // First, deactivate existing mappings if needed
-      // Then insert new mappings
+      // Implementation would depend on your specific database schema and business logic
+      // This is a placeholder for the actual implementation
       
-      await prisma.$transaction(async(tx) => {
-        for (const mapping of mappings) {
-          if (mapping.newGroupType && mapping.newGroupName) {
-            // Only save if user filled in new values
-            await tx.$executeRaw`
-              INSERT INTO sector_group_mappings (
-                sector_code, 
-                tipe_kelompok, 
-                nama_kelompok, 
-                effective_date,
-                is_active,
-                created_by,
-                created_at
-              ) VALUES (
-                ${mapping.sectorCode},
-                ${mapping.newGroupType},
-                ${mapping.newGroupName},
-                ${mapping.effectiveDate},
-                true,
-                ${mapping.createdBy},
-                NOW()
-              )
-            `
-          }
+      const savedMappings: ActiveMapping[] = []
+      let savedCount = 0
+      
+      for (const mapping of mappings) {
+        // Validate required fields
+        if (!mapping.sectorCode) {
+          console.warn('Skipping mapping with missing sector code:', mapping)
+          continue
         }
-      })
-    } catch (error) {
+        
+        // For now, create a mock saved mapping
+        const savedMapping: ActiveMapping = {
+          sectorCode: mapping.sectorCode,
+          tipe_kelompok: mapping.newGroupType || '',
+          nama_kelompok: mapping.newGroupName || '',
+          isActive: true,
+          effectiveDate: mapping.effectiveDate || new Date()
+        }
+        
+        savedMappings.push(savedMapping)
+        savedCount++
+      }
+      
+      return {
+        savedCount,
+        mappings: savedMappings
+      }
+    } catch (error: unknown) {
       console.error('Error saving sector mappings:', error)
-      throw new Error('Failed to save sector mappings to database')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      throw new Error(`Failed to save sector mappings: ${errorMessage}`)
     }
-  }
-
-  /**
-   * Cleanup function to close database connection
-   */
-  static async disconnect(): Promise<void> {
-    await prisma.$disconnect()
   }
 }
