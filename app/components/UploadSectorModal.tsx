@@ -178,13 +178,13 @@ export default function UploadSectorModal({ onClose, onSuccess }: UploadSectorMo
                     <thead className="bg-neutral-50">
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase">
-                          Sector Name
+                          Sector Code
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase">
-                          Sector Group
+                          New Sector Group
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase">
-                          Effective Date
+                          New Sector Name
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-neutral-500 uppercase">
                           Created By
@@ -194,9 +194,9 @@ export default function UploadSectorModal({ onClose, onSuccess }: UploadSectorMo
                     <tbody className="bg-white divide-y divide-neutral-200">
                       {previewData.slice(0, 10).map((row, index) => (
                         <tr key={index} className="hover:bg-neutral-50">
-                          <td className="px-6 py-4 text-sm text-neutral-900">{row.sectorType}</td>
-                          <td className="px-6 py-4 text-sm text-neutral-600">{row.existingGroup}</td>
-                          <td className="px-6 py-4 text-sm text-neutral-600">{row.effectiveDate}</td>
+                          <td className="px-6 py-4 text-sm text-neutral-900">{row.sectorCode}</td>
+                          <td className="px-6 py-4 text-sm text-neutral-600">{row.newGroupType}</td>
+                          <td className="px-6 py-4 text-sm text-neutral-600">{row.newGroupName}</td>
                           <td className="px-6 py-4 text-sm text-neutral-600">{row.createdBy}</td>
                         </tr>
                       ))}

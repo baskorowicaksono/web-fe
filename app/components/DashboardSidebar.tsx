@@ -1,15 +1,21 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '../../lib/hooks/useAuth'
 import { useSidebar } from '../../lib/hooks/useSidebar'
-import { FileIcon } from 'lucide-react'
+import { ChevronRight, Sparkles, FileText, Bot, File, LayoutDashboardIcon, FileBarChartIcon, CogIcon } from 'lucide-react'
 
-const navigation = [
+interface NavigationItem {
+  name: string
+  href?: string
+  icon: React.ReactNode
+  children?: NavigationItem[]
+}
+
+const navigation: NavigationItem[] = [
   { 
-    name: 'Dashboard', 
+    name: 'Home', 
     href: '/dashboard', 
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,69 +23,43 @@ const navigation = [
       </svg>
     )
   },
-  // Add the AI Chat navigation item
-  { 
-    name: 'AI Assistant', 
-    href: '/dashboard/ai-chatbot', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    )
-  },
-  { 
-    name: 'NTF Forecasting', 
-    href: '/dashboard/forecasting', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
-    )
-  },
-  { 
-    name: 'Predictive Analysis', 
-    href: '/dashboard/analysis', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    )
-  },
-  { 
-    name: 'Monitoring', 
-    href: '/dashboard/monitoring', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    )
-  },
-  { 
-    name: 'Reports', 
-    href: '/dashboard/reports', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    )
-  },
-  { 
-    name: 'Data Management', 
-    href: '/dashboard/data', 
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-      </svg>
-    )
+
+  // Parent with child section
+  {
+    name: 'AI',
+    icon: <Bot className="w-5 h-5" />,
+    children: [
+      {
+        name: 'Reports',
+        href: '/dashboard/reports',
+        icon: <FileText className="w-4 h-4" />
+      },
+      {
+        name: 'AI Assistant',
+        href: '/dashboard/ai-chatbot',
+        icon: <Sparkles className="w-4 h-4" />
+      }
+    ]
   },
   {
-    name: 'Sector Mapping',
-    href: '/dashboard/sector-mapping',
-    icon: <FileIcon />
-  },
+    name: "Policies and Indicators",
+    icon: <LayoutDashboardIcon className= "w-4 h-4" />,
+    children: [
+      {
+        name: "Dashboards and Reporting",
+        href: "/dashboard/power-bi",
+        icon: <FileBarChartIcon className= "w-5 h-5" />
+      },
+      {
+        name: "KLM - Sector Mapping",
+        href: "/dashboard/sector-mapping",
+        icon: <CogIcon className='w-5 h-5' />
+      }
+    ]
+  }
 ]
 
-const adminNavigation = [
+const adminNavigation: NavigationItem[] = [
   { 
     name: 'User Management', 
     href: '/dashboard/users', 
@@ -94,7 +74,7 @@ const adminNavigation = [
     href: '/dashboard/settings', 
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.065 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-1.756.426-2.924.426-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     )
@@ -105,8 +85,35 @@ export default function DashboardSidebar() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { isCollapsed, isMobileOpen, toggleCollapse, setMobileOpen } = useSidebar()
+  const [expandedSections, setExpandedSections] = useState<string[]>(['AI']) // Default expand AI section
 
   const isActive = (href: string) => pathname === href
+  
+  const hasActiveChild = (children: NavigationItem[] | undefined) => {
+    if (!children) return false
+    return children.some(child => child.href && isActive(child.href))
+  }
+
+  const toggleSection = (sectionName: string) => {
+    if (isCollapsed) return // Don't toggle when collapsed
+    
+    setExpandedSections(prev => 
+      prev.includes(sectionName)
+        ? prev.filter(name => name !== sectionName)
+        : [...prev, sectionName]
+    )
+  }
+
+  // Auto-expand sections with active children
+  useEffect(() => {
+    navigation.forEach(item => {
+      if (item.children && hasActiveChild(item.children)) {
+        setExpandedSections(prev => 
+          prev.includes(item.name) ? prev : [...prev, item.name]
+        )
+      }
+    })
+  }, [pathname])
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -135,6 +142,122 @@ export default function DashboardSidebar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isMobileOpen, setMobileOpen])
 
+  const renderNavItem = (item: NavigationItem, isChild = false) => {
+    const hasChildren = item.children && item.children.length > 0
+    const isExpanded = expandedSections.includes(item.name)
+    const isParentActive = hasChildren && item.children ? hasActiveChild(item.children) : false
+
+    if (hasChildren) {
+      // Parent item with children
+      return (
+        <div key={item.name}>
+          <button
+            onClick={() => toggleSection(item.name)}
+            className={`nav-item group relative w-full ${
+              isParentActive ? 'active' : ''
+            } ${isCollapsed ? 'justify-center px-2' : ''}`}
+            title={isCollapsed ? item.name : undefined}
+          >
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              {item.icon}
+              <span className={`transition-all duration-300 ${
+                isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+              }`}>
+                {item.name}
+              </span>
+            </div>
+            
+            {!isCollapsed && (
+              <div className={`transition-transform duration-200 ${
+                isExpanded ? 'rotate-90' : ''
+              }`}>
+                <ChevronRight className="w-4 h-4 text-neutral-400" />
+              </div>
+            )}
+
+            {/* Tooltip for collapsed state */}
+            {isCollapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                {item.name}
+              </div>
+            )}
+          </button>
+
+          {/* Children */}
+          {!isCollapsed && (
+            <div className={`overflow-hidden transition-all duration-300 ${
+              isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+              <div className="ml-6 mt-1 space-y-1">
+                {item.children?.map(child => renderNavItem(child, true))}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // Regular item or child item
+    if (!item.href) {
+      // No href - render as div (for parent items without links)
+      return (
+        <div
+          key={item.name}
+          className={`nav-item group relative ${
+            isCollapsed ? 'justify-center px-2' : ''
+          } ${isChild ? 'text-sm py-2' : ''}`}
+          title={isCollapsed ? item.name : undefined}
+        >
+          <div className="flex items-center space-x-3 min-w-0">
+            {item.icon}
+            <span className={`transition-all duration-300 ${
+              isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+            }`}>
+              {item.name}
+            </span>
+          </div>
+          
+          {/* Tooltip for collapsed state */}
+          {isCollapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+              {item.name}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // Has href - render as Link
+    return (
+      <Link
+        key={item.name}
+        href={item.href}
+        className={`nav-item group relative ${
+          isActive(item.href) ? 'active' : ''
+        } ${isCollapsed ? 'justify-center px-2' : ''} ${
+          isChild ? 'text-sm py-2' : ''
+        }`}
+        title={isCollapsed ? item.name : undefined}
+      >
+        <div className="flex items-center space-x-3 min-w-0">
+          {item.icon}
+          <span className={`transition-all duration-300 ${
+            isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
+          }`}>
+            {item.name}
+          </span>
+        </div>
+        
+        {/* Tooltip for collapsed state */}
+        {isCollapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+            {item.name}
+          </div>
+        )}
+      </Link>
+    )
+  }
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -147,10 +270,10 @@ export default function DashboardSidebar() {
       />
 
       {/* Sidebar */}
-      <div 
+      <div
         id="sidebar"
         className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-neutral-100 transition-all duration-300 ease-in-out
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} 
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
           ${isCollapsed ? 'lg:w-20' : 'lg:w-72'}
         `}
@@ -161,22 +284,21 @@ export default function DashboardSidebar() {
           <div className={`flex items-center mb-8 transition-all duration-300 ${
             isCollapsed ? 'justify-center' : 'justify-between'
           }`}>
-            <div className={`flex items-center space-x-3 transition-all duration-300 ${
+            <div className={`flex items-center justify-center w-full transition-all duration-300 ${
               isCollapsed ? 'transform scale-90' : ''
             }`}>
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <div className={`transition-all duration-300 ${
-                isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-              }`}>
-                <h1 className="font-bold text-xl text-neutral-900 whitespace-nowrap">Test Analytics</h1>
-                <p className="text-xs text-neutral-500 whitespace-nowrap">Financial Platform</p>
+              <div className={`transition-all duration-300 ${isCollapsed ? 'w-12 h-12' : 'w-32 h-32'}`}>
+                <Image
+                  src="/LogoFinal.png"
+                  alt="SUPERMAN Logo"
+                  width={isCollapsed ? 48 : 128}
+                  height={isCollapsed ? 48 : 128}
+                  className="object-contain"
+                  priority
+                />
               </div>
             </div>
-            
+
             {/* Desktop Collapse Toggle */}
             <button
               onClick={toggleCollapse}
@@ -200,32 +322,7 @@ export default function DashboardSidebar() {
           
           {/* Navigation */}
           <nav className="flex-1 space-y-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`nav-item group relative ${isActive(item.href) ? 'active' : ''} ${
-                  isCollapsed ? 'justify-center px-2' : ''
-                }`}
-                title={isCollapsed ? item.name : undefined}
-              >
-                <div className="flex items-center space-x-3 min-w-0">
-                  {item.icon}
-                  <span className={`transition-all duration-300 ${
-                    isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-                  }`}>
-                    {item.name}
-                  </span>
-                </div>
-                
-                {/* Tooltip for collapsed state */}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    {item.name}
-                  </div>
-                )}
-              </Link>
-            ))}
+            {navigation.map(item => renderNavItem(item))}
             
             {/* Admin Section */}
             {user?.role === 'ADMIN' && (
@@ -238,86 +335,34 @@ export default function DashboardSidebar() {
                   </h3>
                 </div>
                 <div className="space-y-2">
-                  {adminNavigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`nav-item group relative ${isActive(item.href) ? 'active' : ''} ${
-                        isCollapsed ? 'justify-center px-2' : ''
-                      }`}
-                      title={isCollapsed ? item.name : undefined}
-                    >
-                      <div className="flex items-center space-x-3 min-w-0">
-                        {item.icon}
-                        <span className={`transition-all duration-300 ${
-                          isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'
-                        }`}>
-                          {item.name}
-                        </span>
-                      </div>
-                      
-                      {/* Tooltip for collapsed state */}
-                      {isCollapsed && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                          {item.name}
-                        </div>
-                      )}
-                    </Link>
-                  ))}
+                  {adminNavigation.map(item => renderNavItem(item))}
                 </div>
               </div>
             )}
           </nav>
-
-          {/* Footer */}
-          <div className={`mt-auto pt-6 border-t border-neutral-100 transition-all duration-300 ${
-            isCollapsed ? 'opacity-0 h-0 overflow-hidden border-t-0 pt-0' : 'opacity-100'
+          
+          {/* User Profile */}
+          <div className={`pt-6 border-t border-neutral-100 transition-all duration-300 ${
+            isCollapsed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'
           }`}>
-            <div className="p-4 bg-primary-50 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-primary-900">Need Help?</p>
-                  <p className="text-xs text-primary-700">Check our documentation</p>
-                </div>
+            <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-neutral-900 truncate">
+                  {user?.name || 'User'}
+                </p>
+                <p className="text-xs text-neutral-500 truncate">
+                  {user?.email || 'user@example.com'}
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Collapsed state help icon */}
-          {isCollapsed && (
-            <div className="mt-auto pt-6 flex justify-center">
-              <button 
-                className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center hover:bg-primary-100 transition-colors duration-200 group relative"
-                title="Need Help?"
-              >
-                <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                  Need Help?
-                </div>
-              </button>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Mobile menu button */}
-      <button
-        id="mobile-toggle"
-        onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 bg-white rounded-xl border border-neutral-200"
-        style={{boxShadow: '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 30px -5px rgba(0, 0, 0, 0.05)'}}
-      >
-        <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
     </>
   )
 }

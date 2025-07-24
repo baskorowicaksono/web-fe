@@ -258,6 +258,20 @@ export class ExcelUtils {
     XLSX.writeFile(wb, filename)
   }
 
+  // Add this helper method to your ExcelUtils class
+  private static cleanExcelString(value: any): string {
+    if (!value) return '';
+    
+    return String(value)
+      .replace(/\u00A0/g, ' ')           // Non-breaking space
+      .replace(/\u2000-\u200F/g, ' ')    // Various Unicode spaces
+      .replace(/\u2028-\u2029/g, ' ')    // Line/paragraph separators
+      .replace(/\uFEFF/g, '')            // Byte order mark
+      .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width characters
+      .trim()
+      .replace(/\s+/g, ' ');             // Normalize multiple spaces to single space
+  }
+
   // Parse Excel file (updated to handle Indonesian headers)
   static async parseExcelFile(file: File): Promise<ExcelSectorData[]> {
     return new Promise((resolve, reject) => {
@@ -284,24 +298,22 @@ export class ExcelUtils {
 
           // Transform data to match your interface
           const mappings: ExcelSectorData[] = jsonData.map((row: any) => ({
-            sectorCode: String(row['Sandi Sektor Ekonomi'] || '').trim(),
-            sectorType: String(row['Jenis Kelompok Eksisting'] || '').trim(),
-            existingGroup: String(row['Kelompok Sektor Eksisting'] || '').trim(),
-            newGroupType: String(row['Jenis Kelompok Baru'] || '').trim(),
-            newGroupName: String(row['Kelompok Sektor Baru'] || '').trim(),
+            sectorCode: this.cleanExcelString(row['Sandi Sektor Ekonomi']),
+            sectorType: this.cleanExcelString(row['Jenis Kelompok Eksisting']),
+            existingGroup: this.cleanExcelString(row['Kelompok Sektor Eksisting']),
+            newGroupType: this.cleanExcelString(row['Jenis Kelompok Baru']),
+            newGroupName: this.cleanExcelString(row['Kelompok Sektor Baru']),
             effectiveDate: new Date().toISOString().split('T')[0],
             endDate: '',
             createdBy: 'system',
             updatedBy: '',
             approvedBy: ''
           })).filter((row: ExcelSectorData) => row.sectorCode) // Filter out empty rows
-          
           resolve(mappings)
         } catch (error) {
           reject(new Error('Failed to parse Excel file'))
         }
       }
-      
       reader.onerror = () => reject(new Error('Failed to read file'))
       reader.readAsArrayBuffer(file)
     })
@@ -310,9 +322,8 @@ export class ExcelUtils {
   // Validate Excel data
   static validateExcelData(mappings: ExcelSectorData[]): { isValid: boolean; errors: string[] } {
     const errors: string[] = []
-    
     mappings.forEach((mapping, index) => {
-      const rowNum = index + 2 // Account for header and 0-based index
+      const rowNum = index + 1 // Account for header and 0-based index
       
       if (!mapping.sectorCode) {
         errors.push(`Row ${rowNum}: Sandi Sektor Ekonomi is required`)
@@ -333,9 +344,12 @@ export class ExcelUtils {
       }
 
       // Validate tipe_kelompok values against enum
-      if (mapping.newGroupType) {
-        const validTypes = ['Non KLM', 'Sektor Tertentu', 'Hijau']
-        if (!validTypes.includes(mapping.newGroupType)) {
+      if (mapping.newGroupType){
+        console.log(mapping)
+        const validTypes = ["Non KLM", "Sektor Tertentu", "Hijau"]
+        const check = validTypes.includes(mapping.newGroupType);
+        console.log(check);
+        if (!check) {
           errors.push(`Row ${rowNum}: Jenis Kelompok Baru must be one of: ${validTypes.join(', ')}`)
         }
       }

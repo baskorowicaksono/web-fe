@@ -24,7 +24,7 @@ export default function AIChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! I\'m your AI assistant powered by your uploaded reports. I can help you analyze data, find insights, and answer questions about your financial reports. What would you like to know?',
+      content: 'Halo! Saya adalah chatbot AI yang dipersonalisasi untuk Anda. Saya bisa membantu anda untuk menganalisa data, menggali insights, dan menjawab pertanyaan seputar makroprudensial. Bagaimana keperluan Anda?',
       role: 'assistant',
       timestamp: new Date(),
       sources: []
@@ -43,22 +43,22 @@ export default function AIChatPage() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([
     {
       id: '1',
-      title: 'Q4 Revenue Analysis',
-      lastMessage: 'What were the key factors driving Q4 performance?',
+      title: 'Analisis Pertumbuhan PDB Sektoral TW I 2025',
+      lastMessage: 'Apa faktor utama penyebab turunnya pertumbuhan PDB?',
       timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 min ago
       messageCount: 8
     },
     {
       id: '2', 
-      title: 'Risk Assessment Summary',
-      lastMessage: 'Can you compare risk levels across different sectors?',
+      title: 'RBB Bank Mandiri Januari 2025 dan Analisis Risiko',
+      lastMessage: 'Bagaimana proyeksi pertumbuhan kredit dan kaitannya dengan model bisnis bank dalam mencapai target RBB 2025?',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
       messageCount: 12
     },
     {
       id: '3',
-      title: 'Market Trends Discussion',
-      lastMessage: 'Analyze the market trends from the uploaded reports',
+      title: 'Demand Kredit Sektoral Juni 2025',
+      lastMessage: 'Analisa sektor yang mengalami perlambatan pertumbuhan kredit paling tinggi untuk periode Juni 2025',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
       messageCount: 5
     }
@@ -66,10 +66,10 @@ export default function AIChatPage() {
 
   // Mock available reports for context
   const availableReports = [
-    'Q4 2024 Financial Analysis.pdf',
-    'Risk Assessment Report.pdf', 
-    'Market Research Summary.pdf',
-    'Economic Indicators Report.pdf'
+    'Laporan Pertumbuhan PDB Triwulan I 2025.pdf',
+    'Target & Risk Assessment Report - PT Bank Mandiri Tbk.pdf',
+    'Laporan Keuangan Perusahaan di Indonesia.pdf',
+    'Laporan Indikator Ekonomi Triwulan II 2025.pdf'
   ]
 
   const scrollToBottom = () => {
@@ -111,10 +111,7 @@ export default function AIChatPage() {
 
   const generateMockResponse = (userInput: string): string => {
     const responses = [
-      `Based on your uploaded reports, I can see several key insights. The Q4 financial data shows a 15.3% increase in revenue compared to Q3, primarily driven by improved market conditions and strategic initiatives outlined in your latest economic analysis.`,
-      `Looking at the risk assessment data from your reports, the current risk level appears to be within acceptable parameters. However, I notice some emerging trends that warrant attention, particularly in the banking sector metrics.`,
-      `The market research data indicates strong growth potential. According to your uploaded analysis, there's been a 8.7% improvement in key performance indicators, with particularly strong performance in the technology and healthcare sectors.`,
-      `From the financial reports you've uploaded, I can identify three main trend patterns: 1) Increased operational efficiency, 2) Better risk management, and 3) Improved market positioning. Would you like me to elaborate on any of these areas?`
+      `KLM dapat mendorong pertumbuhan kredit dengan mengidentifikasi sektor-sektor yang memiliki daya ungkit tinggi dan mengoptimalkan struktur ekonomi. KLM dapat memperkuat kebijakan insentif untuk sektor-sektor seperti otomotif, pariwisata, dan ekonomi kreatif yang memiliki potensi pertumbuhan kredit tinggi. Dalam beberapa waktu ke belakang, Bank Indonesia sudah melakukan beberapa penguatan KLM melalui insentif pada sektor-sektor ekonomi yang mendorong pertumbuhan kredit. Apakah Anda mau tahu lebih dalam mengenai detail kebijakan KLM dari waktu ke waktu?`
     ]
     return responses[Math.floor(Math.random() * responses.length)]
   }
@@ -135,7 +132,7 @@ export default function AIChatPage() {
     setMessages([
       {
         id: '1',
-        content: 'Hello! I\'m your AI assistant powered by your uploaded reports. I can help you analyze data, find insights, and answer questions about your financial reports. What would you like to know?',
+        content: 'Halo! Saya adalah chatbot AI yang dipersonalisasi untuk Anda. Saya bisa membantu anda untuk menganalisa data, menggali insights, dan menjawab pertanyaan seputar makroprudensial. Bagaimana keperluan Anda?',
         role: 'assistant',
         timestamp: new Date(),
         sources: []
@@ -185,7 +182,7 @@ export default function AIChatPage() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="animate-slide-up">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">AI Financial Assistant</h1>
+        <h1 className="text-3xl font-bold text-neutral-900 mb-2">AI Chatbot</h1>
         <p className="text-neutral-600 text-lg">
           Powered by your uploaded reports • Ask questions, get insights, analyze data
         </p>
@@ -202,7 +199,7 @@ export default function AIChatPage() {
               {/* History Header */}
               <div className="p-4 border-b border-neutral-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-neutral-900">Chat History</h3>
+                  <h3 className="text-lg font-semibold text-neutral-900">Riwayat</h3>
                   <button
                     onClick={() => setShowHistory(false)}
                     className="p-1 hover:bg-neutral-100 rounded-lg transition-colors"
@@ -279,7 +276,7 @@ export default function AIChatPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-semibold text-neutral-900">
-                        {currentSession ? currentSession.title : 'AI Financial Assistant'}
+                        {currentSession ? currentSession.title : 'Personal AI Assistant'}
                       </h2>
                       <p className="text-sm text-neutral-600">
                         Powered by {availableReports.length} uploaded reports
