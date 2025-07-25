@@ -35,10 +35,10 @@ export default function HomePage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-neutral-900 mb-3">
-            Test App
+            Superman
           </h1>
           <p className="text-neutral-600 text-lg">
-            Financing Superapp Forecasting Platform
+            SuperApps Makroprudensial Terintegrasi
           </p>
         </div>
 

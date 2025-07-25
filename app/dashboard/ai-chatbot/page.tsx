@@ -66,8 +66,8 @@ export default function AIChatPage() {
 
   // Mock available reports for context
   const availableReports = [
-    'Laporan Pertumbuhan PDB Triwulan I 2025.pdf',
-    'Target & Risk Assessment Report - PT Bank Mandiri Tbk.pdf',
+    'Asesmen KLM Terhadap Perkembangan Kredit dan DPK.pdf',
+    'Proyeksi Kredit Sektoral TW III 2025.pdf',
     'Laporan Keuangan Perusahaan di Indonesia.pdf',
     'Laporan Indikator Ekonomi Triwulan II 2025.pdf'
   ]

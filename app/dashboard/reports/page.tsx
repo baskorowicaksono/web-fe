@@ -9,39 +9,39 @@ export default function ReportsPage() {
   const reports = [
     { 
       id: 1, 
-      title: 'Monthly Economic Analysis', 
-      description: 'Comprehensive analysis of economic indicators and trends',
-      type: 'Monthly',
+      title: 'Target & Risk Assessment Report - PT Bank Mandiri Tbk.', 
+      description: 'Asesmen mengenai risiko dan peluang dari target bisnis PT Bank Mandiri',
+      type: 'Semesteran',
       status: 'completed',
-      generatedAt: '2024-12-01',
+      generatedAt: '2025-02-01',
       size: '2.4 MB'
     },
     { 
       id: 2, 
-      title: 'Quarterly Forecast Report', 
-      description: 'Detailed quarterly forecasting and predictions',
-      type: 'Quarterly',
+      title: 'Laporan Pertumbuhan PDB TW I 2025', 
+      description: 'Laporan detail mengenai pertumbuhan PDB secara granular di Triwulan I 2025',
+      type: 'Triwulanan',
       status: 'processing',
-      generatedAt: '2024-11-28',
+      generatedAt: '2025-06-28',
       size: 'Processing...'
     },
     { 
       id: 3, 
-      title: 'Risk Assessment Summary', 
-      description: 'Risk analysis and mitigation strategies',
-      type: 'Weekly',
+      title: 'Laporan Indikator Ekonomi Triwulan II 2025', 
+      description: 'Laporan terkait indikator-indikator ekonomi dan dampak dari kebijakan fiskal',
+      type: 'Triwulanan',
       status: 'completed',
-      generatedAt: '2024-11-25',
+      generatedAt: '2025-07-10',
       size: '1.8 MB'
     },
     { 
       id: 4, 
-      title: 'Policy Impact Analysis', 
-      description: 'Analysis of recent policy changes and their impact',
-      type: 'Ad-hoc',
+      title: 'Laporan Keuangan Perusahaan di Indonesia', 
+      description: 'Analisis menyeluruh mengenai laporan dan kondisi keuangan perusahaan di Indonesia',
+      type: 'Bulanan',
       status: 'completed',
-      generatedAt: '2024-11-20',
-      size: '3.1 MB'
+      generatedAt: '2025-02-19',
+      size: '17.1 MB'
     },
   ]
 

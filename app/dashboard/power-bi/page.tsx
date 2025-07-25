@@ -17,7 +17,7 @@ export default function PowerBIDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [embedConfig, setEmbedConfig] = useState<PowerBIEmbedConfig>({
-    embedUrl: 'https://app.powerbi.com/view?r=eyJrIjoiZDJkNzliYjQtNDhjZC00NDc3LTgzN2YtMzdlNGVhZmZlZjE1IiwidCI6ImNhMzc0OTJlLWY0MTAtNDI3Yi1hYjM5LTA1NWJkYzE4Y2UwMiIsImMiOjEwfQ%3D%3D', // You'll need to fill this with your actual Power BI embed URL
+    embedUrl: 'https://app.powerbi.com/view?r=eyJrIjoiYTc0ZWJlNzQtMGNmOC00YjczLThmOWUtYzY1MDFkZDc0ZDZjIiwidCI6ImNhMzc0OTJlLWY0MTAtNDI3Yi1hYjM5LTA1NWJkYzE4Y2UwMiIsImMiOjEwfQ%3D%3D', // You'll need to fill this with your actual Power BI embed URL
     reportId: '',
     groupId: '',
     title: 'Financial Analytics Dashboard',
