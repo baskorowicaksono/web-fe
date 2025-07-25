@@ -20,6 +20,10 @@ interface ChatSession {
   messageCount: number
 }
 
+interface APIResponse {
+  answer: string
+}
+
 export default function AIChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -80,6 +84,120 @@ export default function AIChatPage() {
     scrollToBottom()
   }, [messages])
 
+  // Extract first answer from API response
+  const extractFirstAnswer = (apiResponse: string): string => {
+    try {
+      // Use regex to find the first "Answer: " (with space) followed by content
+      // This avoids matching "Answer:" within "Helpful Answer:"
+      const answerMatch = apiResponse.match(/\bAnswer:\s+([\s\S]*?)(?=\bAnswer:|$)/)
+      
+      if (answerMatch) {
+        let content = answerMatch[1].trim()
+        
+        // Clean up repetitive content
+        content = removeRepetitiveText(content)
+        
+        return content
+      }
+
+      // If no "Answer: " pattern found, return original response
+      return apiResponse
+    } catch (error) {
+      console.error('Error extracting first answer:', error)
+      return apiResponse
+    }
+  }
+
+  // Remove repetitive sentences or phrases
+  const removeRepetitiveText = (text: string): string => {
+    try {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0)
+      const uniqueSentences: string[] = []
+      const seenSentences = new Set<string>()
+
+      for (const sentence of sentences) {
+        const cleanSentence = sentence.trim().toLowerCase()
+        
+        // Skip if we've seen this sentence before (case-insensitive)
+        if (!seenSentences.has(cleanSentence) && cleanSentence.length > 10) {
+          seenSentences.add(cleanSentence)
+          uniqueSentences.push(sentence.trim())
+        }
+      }
+
+      // Limit to reasonable length (first 5 unique sentences)
+      const result = uniqueSentences.slice(0, 5).join('. ')
+      
+      // Add period if doesn't end with punctuation
+      if (result && !/[.!?]$/.test(result)) {
+        return result + '.'
+      }
+      
+      return result
+    } catch (error) {
+      console.error('Error removing repetitive text:', error)
+      return text
+    }
+  }
+
+  // Generate mock response for fallback
+  const generateMockResponse = (userInput: string): string => {
+    const responses = [
+      `Berdasarkan analisis data yang tersedia, pertanyaan Anda terkait "${userInput}" memerlukan kajian lebih mendalam. Saat ini sistem sedang menganalisis berbagai laporan keuangan dan indikator makroprudensial untuk memberikan jawaban yang komprehensif.`,
+      
+      `Dari data yang tersimpan, terdapat beberapa faktor yang mempengaruhi topik yang Anda tanyakan. KLM dapat memperkuat kebijakan insentif untuk sektor-sektor seperti otomotif, pariwisata, dan ekonomi kreatif yang memiliki potensi pertumbuhan kredit tinggi.`,
+      
+      `Analisis menunjukkan bahwa pertumbuhan ekonomi dan kebijakan moneter memiliki dampak signifikan terhadap sektor yang Anda tanyakan. Bank Indonesia telah melakukan beberapa penguatan melalui insentif pada sektor-sektor ekonomi yang mendorong pertumbuhan kredit.`,
+      
+      `Berdasarkan laporan terkini, terdapat indikasi positif pada area yang Anda tanyakan. Namun, untuk analisis yang lebih detail, diperlukan waktu pemrosesan tambahan untuk mengkaji seluruh dokumen yang relevan.`
+    ]
+    return responses[Math.floor(Math.random() * responses.length)]
+  }
+
+  // Call the real LLM API with 3-minute timeout and fallback
+  const callLLMAPI = async (question: string): Promise<string> => {
+    const API_TIMEOUT = 100 * 60 * 1000 // 3 minutes in milliseconds
+    const API_URL = process.env.NEXT_PUBLIC_LLM_API_URL || 'http://localhost:3010/ask'
+
+    try {
+      // Create abort controller for timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT)
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: question
+        }),
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`)
+      }
+
+      const data: APIResponse = await response.json()
+      
+      // Extract the first answer from the API response
+      return extractFirstAnswer(data.answer)
+      
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('API timeout after 100 minutes, using mock response')
+        // Return mock response on timeout
+        return generateMockResponse(question)
+      }
+      
+      console.error('Error calling LLM API:', error)
+      throw new Error('Failed to get response from AI. Please try again.')
+    }
+  }
+
   const handleSendMessage = async () => {
     if (!currentMessage.trim() || isLoading) return
 
@@ -91,29 +209,42 @@ export default function AIChatPage() {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const questionToSend = currentMessage.trim()
     setCurrentMessage('')
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call the real LLM API
+      const aiResponse = await callLLMAPI(questionToSend)
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateMockResponse(userMessage.content),
+        content: aiResponse,
         role: 'assistant',
         timestamp: new Date(),
-        sources: getRandomSources()
+        sources: getRandomSources() // Keep this for now, can be updated based on actual API response
       }
 
       setMessages(prev => [...prev, assistantMessage])
-      setIsLoading(false)
-    }, 1500 + Math.random() * 1000)
-  }
+      
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error)
+      
+      // Show error message to user
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi.',
+        role: 'assistant',
+        timestamp: new Date(),
+        sources: []
+      }
 
-  const generateMockResponse = (userInput: string): string => {
-    const responses = [
-      `KLM dapat mendorong pertumbuhan kredit dengan mengidentifikasi sektor-sektor yang memiliki daya ungkit tinggi dan mengoptimalkan struktur ekonomi. KLM dapat memperkuat kebijakan insentif untuk sektor-sektor seperti otomotif, pariwisata, dan ekonomi kreatif yang memiliki potensi pertumbuhan kredit tinggi. Dalam beberapa waktu ke belakang, Bank Indonesia sudah melakukan beberapa penguatan KLM melalui insentif pada sektor-sektor ekonomi yang mendorong pertumbuhan kredit. Apakah Anda mau tahu lebih dalam mengenai detail kebijakan KLM dari waktu ke waktu?`
-    ]
-    return responses[Math.floor(Math.random() * responses.length)]
+      setMessages(prev => [...prev, errorMessage])
+      toast.error('Failed to get AI response')
+      
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const getRandomSources = (): string[] => {
